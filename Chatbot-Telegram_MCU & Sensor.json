@@ -1,0 +1,205 @@
+{
+  "name": "Chatbot-Telegram_MCU & Sensor",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "7b021024-9010-49cf-afcd-76295c4357cb",
+      "name": "Telegram Trigger",
+      "webhookId": "d96bc1a7-7a53-419c-a160-3e59f712ca4c",
+      "credentials": {
+        "telegramApi": {
+          "id": "ksF5PP7emffwmxad",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{$json.message.text}}",
+        "options": {
+          "systemMessage": "Peran\nKamu adalah asisten yang membantu menjawab pertanyaan tentang komponen robotika seperti mikrokontroler (MCU) dan sensor.\n\nSumber Data\nGunakan informasi yang tersedia pada tool \"Get row(s) in sheet in Google Sheets\" untuk menjawab pertanyaan pengguna.\n\nInstruksi\nJawablah pertanyaan pengguna mengenai:\n- Nama komponen robotika\n- Jenis komponen (MCU atau sensor)\n- Fungsi atau deskripsi komponen\n- Harga komponen\n\nBatasan\nJika informasi yang diminta tidak ditemukan pada data di Google Sheets, jangan membuat jawaban sendiri. Berikan jawaban seperti berikut:\n\nMaaf, saya belum menemukan data komponen robotika yang Anda maksud di database.\""
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "a84adb55-6ac1-493e-9ac9-c80b79a8ac4e",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        80,
+        192
+      ],
+      "id": "fd6573d0-5c6e-448a-8d02-2b7285fc5fa1",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "PGva5P9CrGrdEkdM",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{$json.message.chat.id}}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        240,
+        192
+      ],
+      "id": "217c9e52-5a4e-42b2-a9bd-81c7808eee6d",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "value": "1zJWBBTkaPoXEDPVbKfBiK4JZ8e7zh3XrX_UIaemP240",
+          "mode": "list",
+          "cachedResultName": "n8n 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zJWBBTkaPoXEDPVbKfBiK4JZ8e7zh3XrX_UIaemP240/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1704846899,
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zJWBBTkaPoXEDPVbKfBiK4JZ8e7zh3XrX_UIaemP240/edit#gid=1704846899"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        400,
+        192
+      ],
+      "id": "4288b452-b6bb-45eb-9c42-e99f35a74ed6",
+      "name": "Get row(s) in sheet in Google Sheets",
+      "credentials": {
+        "googleApi": {
+          "id": "KFx3153WicLB05ka",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.from.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        560,
+        0
+      ],
+      "id": "6dd0ac50-2128-4d22-bb08-f79e54735aa7",
+      "name": "Send a text message",
+      "webhookId": "e053b5ea-e392-4034-b87f-c7c7a6a23cf8",
+      "credentials": {
+        "telegramApi": {
+          "id": "ksF5PP7emffwmxad",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "76815e61-1dc5-47f3-b94d-5e82aef9d43b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f9009ea87e2584feb792b9aba1acbfa3f537531ac8a4f9fded5d20e57c6e367e"
+  },
+  "id": "60upOzj9SkZ2NpP7",
+  "tags": []
+}
