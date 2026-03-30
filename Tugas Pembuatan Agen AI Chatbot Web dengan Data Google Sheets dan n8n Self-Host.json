@@ -1,0 +1,160 @@
+{
+  "name": "Tugas Pembuatan Agen AI Chatbot Web dengan Data Google Sheets dan n8n Self-Host",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "Hi, aku biebot\nbot yang bantu menjawab semua pertanyaan dalam konteks MCU",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -384,
+        -144
+      ],
+      "id": "aaeb1bb8-0f56-4ecc-b38e-5456ece853a6",
+      "name": "When chat message received",
+      "webhookId": "abe82439-baf7-42da-911e-0ab3bd33c0f9"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=Peran\nKamu adalah asisten yang membantu menjawab pertanyaan tentang komponen robotika seperti mikrokontroler (MCU) dan sensor.\n\nSumber Data\nGunakan informasi yang tersedia pada tool \"Get row(s) in sheet in Google Sheets\" untuk menjawab pertanyaan pengguna.\n\nInstruksi\nJawablah pertanyaan pengguna mengenai:\n- Nama komponen robotika\n- Jenis komponen (MCU atau sensor)\n- Fungsi atau deskripsi komponen\n- Harga komponen\n\nBatasan\nJika informasi yang diminta tidak ditemukan pada data di Google Sheets, jangan membuat jawaban sendiri. Berikan jawaban seperti berikut:\n\nMaaf, saya belum menemukan data komponen robotika yang Anda maksud di database.\""
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -160,
+        -32
+      ],
+      "id": "58c695e5-bdca-4d76-bd37-a1e89d88a4fc",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -352,
+        48
+      ],
+      "id": "83bbd15e-f7f6-49c9-990c-810289266b77",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "PGva5P9CrGrdEkdM",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -224,
+        112
+      ],
+      "id": "07b29eae-b4a1-473c-8522-387a5874288a",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "value": "1zJWBBTkaPoXEDPVbKfBiK4JZ8e7zh3XrX_UIaemP240",
+          "mode": "list",
+          "cachedResultName": "n8n 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zJWBBTkaPoXEDPVbKfBiK4JZ8e7zh3XrX_UIaemP240/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1704846899,
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zJWBBTkaPoXEDPVbKfBiK4JZ8e7zh3XrX_UIaemP240/edit#gid=1704846899"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -64,
+        112
+      ],
+      "id": "79969ab1-f72e-47ad-813e-c6139b565259",
+      "name": "Get row(s) in sheet in Google Sheets",
+      "credentials": {
+        "googleApi": {
+          "id": "KFx3153WicLB05ka",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "82bf0ecc-ea6a-4551-84b2-65382c59a28f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f9009ea87e2584feb792b9aba1acbfa3f537531ac8a4f9fded5d20e57c6e367e"
+  },
+  "id": "F7t7BcehawWQhY8Z",
+  "tags": []
+}
